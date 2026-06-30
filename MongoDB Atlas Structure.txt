@@ -1,0 +1,66 @@
+Database:
+PromptCleaning
+
+Collections:
+fillers
+hedges
+gestures
+courtesy
+
+Sample JSON :
+
+fillers:
+{
+    "value":"um"
+},
+{
+    "value":"uh"
+},
+{
+    "value":"like"
+}
+
+
+hedges:
+{
+    "value":"I think"
+},
+{
+    "value":"maybe"
+},
+{
+    "value":"sort of"
+}
+
+
+gestures:
+
+{
+    "value":"laughs"
+},
+{
+    "value":"smiles"
+},
+{
+    "value":"shrugs"
+}
+
+courtesy:
+{
+    "value":"please"
+},
+{
+    "value":"thank you"
+},
+{
+    "value":"kindly"
+},
+{
+    "value":"thx"
+},
+{
+    "value":"thanks"
+}
+
+
+
