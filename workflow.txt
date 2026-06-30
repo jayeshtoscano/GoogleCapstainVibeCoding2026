@@ -1,0 +1,11 @@
+1. Gatekeeper receives raw input
+2. Reads agent.md
+3. LeanContent() applied
+4. Cache Agent checked
+5. If MISS → Prompt Refining Agent (CLEAR rules)
+6. Category Agent classifies request
+7. LLM Routing Agent selects model (skill.md)
+8. LLM executes request
+9. Cache Agent stores response
+10. Observability Agent logs metrics
+11. Response returned
