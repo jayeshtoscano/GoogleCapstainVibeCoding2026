@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+
+  ##########################################################
+  # FastAPI AI Platform
+  ##########################################################
+  api:
+
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+
+    container_name: gatekeeper-ai-api
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      - mongo
+
+    environment:
+
+      # MongoDB connection used by mongodb.py
+      MONGO_URI: mongodb://mongo:27017
+
+      # Optional runtime config
+      ENV: development
+
+    volumes:
+      - .:/app
+
+    restart: unless-stopped
+
+
+  ##########################################################
+  # MongoDB Database
+  ##########################################################
+  mongo:
+
+    image: mongo:6
+
+    container_name: gatekeeper-mongo
+
+    ports:
+      - "27017:27017"
+
+    volumes:
+      - mongo_data:/data/db
+
+    restart: unless-stopped
+
+
+##########################################################
+# Persistent Storage
+##########################################################
+volumes:
+
+  mongo_data:
