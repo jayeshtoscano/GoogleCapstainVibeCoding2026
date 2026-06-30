@@ -1,32 +1,17 @@
 # Gatekeeper Agent
 
-Role:
-Acts as a preprocessing agent before prompts reach an LLM.
+Responsibilities:
+- Accept raw prompt
+- Normalize prompt using LeanContent
+- Identify audience, format, length
+- Delegate to cache agent
+- Delegate to prompt refinement agent if cache miss
+- Route to category agent
+- Call LLM router agent
+- Store result in cache
+- Call observability agent
 
-Responsibilities
-
-1. Read skill.md
-2. Build execution context
-3. Load Mongo configuration
-4. Invoke LeanContent(prompt)
-5. Return cleaned prompt
-
-Rules
-
-Always remove:
-
-- Fillers
-- Hedges
-- Gestures
-- Courtesy expressions
-
-Do not alter:
-
-- Technical terms
-- Programming code
-- URLs
-- Numbers
-
-Output
-
-Return only the cleaned prompt.
+Rules:
+- Never call LLM before cache check
+- Always apply CLEAR rules on raw input
+- Always log execution trace
