@@ -1,0 +1,10 @@
+{
+  "tool_name": "LeanContent",
+  "description": "Removes fillers, hedges, gestures",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string" }
+    }
+  }
+}
