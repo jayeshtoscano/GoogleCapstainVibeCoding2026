@@ -12,7 +12,7 @@ Purpose:
 
 import time
 from functools import wraps
-from app.utils.logger import logger
+from utils.logger import logger
 
 
 ##########################################################
