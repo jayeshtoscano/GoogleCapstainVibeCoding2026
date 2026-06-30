@@ -1,18 +1,25 @@
-name: LeanContentSkill
+llms:
+  openai:
+    model: gpt-4.1-mini
+    cost: low
+    latency: medium
 
-description: >
-  Removes conversational noise before prompts are sent to LLMs.
+  gemini:
+    model: gemini-2.5-flash
+    cost: low
+    latency: low
+
+  claude:
+    model: claude-3-haiku
+    cost: medium
+    latency: low
+
+routing_rules:
+  coding: openai
+  summarization: gemini
+  reasoning: claude
+
+fallback: gemini
 
 mongodb:
-  connection_string: mongodb+srv://<username>:<password>@cluster.mongodb.net/
-  database: PromptCleaning
-  collections:
-    fillers: fillers
-    hedges: hedges
-    gestures: gestures
-    courtesy: courtesy
-
-settings:
-  lowercase: false
-  trim_spaces: true
-  remove_duplicate_spaces: true
+  database: GatekeeperDB
