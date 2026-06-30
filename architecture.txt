@@ -1,0 +1,30 @@
+                           Client
+                              │
+                              ▼
+                    POST /gatekeeper
+                              │
+                              ▼
+                    Gatekeeper Agent
+                              │
+      ┌───────────────────────┼─────────────────────────┐
+      │                       │                         │
+      ▼                       ▼                         ▼
+CheckReusability()     Build Agent Context      Load Rules
+      │
+      │ Cache Hit
+      ▼
+ Return Cached Response
+      │
+      └──────────────No────────────────────────────┐
+                                                   ▼
+                                          LeanContent()
+                                                   ▼
+                                          AddConstraint()
+                                                   ▼
+                                           AddExplicit()
+                                                   ▼
+                                          AddArchitected()
+                                                   ▼
+                                          UpdateCacheList()
+                                                   ▼
+                                             Final Response
