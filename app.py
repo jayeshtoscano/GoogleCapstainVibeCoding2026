@@ -1,3 +1,5 @@
+#### Monolith version.
+### To be used if performance recommendation is to use monolith instead of microservices.
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
