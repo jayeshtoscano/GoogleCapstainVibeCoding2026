@@ -1,0 +1,20 @@
+{
+  "agent_name": "Gatekeeper",
+  "version": "1.0",
+  "visibility": "partner-only",
+  "capabilities": [
+    "prompt_cleaning",
+    "routing",
+    "cache_control",
+    "llm_selection"
+  ],
+  "exposed_tools": [
+    "LeanContent",
+    "AddConstraint",
+    "AddExplicit"
+  ],
+  "security": {
+    "auth": "OAuth2",
+    "rate_limit": "100 rpm"
+  }
+}
