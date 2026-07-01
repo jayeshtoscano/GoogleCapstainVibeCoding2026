@@ -12,9 +12,9 @@ Purpose:
 """
 
 from typing import Dict, Any, Callable
-import logging
+from utils.logger import get_logger
 
-logger = logging.getLogger("mcp")
+logger = get_logger("mcp")
 
 
 ##########################################################
