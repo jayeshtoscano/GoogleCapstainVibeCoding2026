@@ -11,8 +11,8 @@ Purpose:
 ------------------------------------------------------------
 """
 
-from app.services.mongodb import db
-from app.utils.logger import logger
+from services.mongodb import db
+from utils.logger import logger
 
 
 ##########################################################
