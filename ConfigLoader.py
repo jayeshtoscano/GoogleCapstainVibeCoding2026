@@ -13,10 +13,10 @@ Purpose:
 """
 
 import yaml
-import logging
+from utils.logger import get_logger
 from typing import Dict, Any
 
-logger = logging.getLogger("config_loader")
+logger = get_logger("config_loader")
 
 
 ##########################################################
