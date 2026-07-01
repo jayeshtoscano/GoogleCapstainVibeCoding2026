@@ -1,6 +1,6 @@
 import re
 
-from config_loader import get_agent_config
+from ConfigLoader import get_agent_config
 from utils.logger import logger
 
 
