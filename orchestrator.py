@@ -4,19 +4,22 @@ from agents.prompt_refiner import PromptRefinerAgent
 from agents.category_agent import CategoryAgent
 from agents.llm_router import LLMRouterAgent
 from agents.observability_agent import ObservabilityAgent
-
+from services.lean_content import LeanContent
+from services.constraints import AddConstraint
+from services.explicit import AddExplicit
 
 class Orchestrator:
 
     def __init__(self):
 
-        self.gatekeeper = GatekeeperAgent()
         self.cache = CacheAgent()
         self.refiner = PromptRefinerAgent()
         self.category = CategoryAgent()
         self.router = LLMRouterAgent()
         self.obs = ObservabilityAgent()
         self.reviewer = ReviewerAgent()
+            self.gatekeeper = GatekeeperAgent(observability_agent=self.observability_agent,cache_agent=self.cache_agent,lean_content_fn=LeanContent,constraint_fn=AddConstraint,explicit_fn=AddExplicit
+        )
         
     def run(self, prompt: str):
 
