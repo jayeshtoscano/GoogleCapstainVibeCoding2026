@@ -1,4 +1,4 @@
-from app.services.cache_service import CacheService
+from services.cache_service import CacheService
 
 class CacheAgent:
 
