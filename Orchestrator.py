@@ -21,27 +21,40 @@ class Orchestrator:
 
         start = self.obs.start_timer()
 
-        # 1. Gatekeeper
+        #1. Review agent to check rules and security acting as structured as well as semantic gating
+        review = self.reviewer.run(prompt)
+
+        if not review["approved"]:
+
+            return {
+                "status": "rejected",
+                "issues": review["issues"]
+            }
+
+        prompt = review["final_prompt"]
+
+        cleaned = self.gatekeeper.process(prompt)
+        # 2. Gatekeeper
         cleaned = self.gatekeeper.process(prompt)
 
-        # 2. Cache check
+        # 3. Cache check
         cached = self.cache.check(prompt)
         if cached:
             return cached
 
-        # 3. Refiner
+        # 4. Refiner
         refined = self.refiner.process(cleaned)
 
-        # 4. Category detection
+        # 5. Category detection
         category = self.category.classify(refined)
 
-        # 5. LLM routing
+        # 6. LLM routing
         response = self.router.run(refined, category)
 
-        # 6. Cache update
+        # 7. Cache update
         self.cache.store(prompt, response)
 
-        # 7. Observability
+        # 8. Observability
         self.obs.log(prompt, response, start)
 
         return {
