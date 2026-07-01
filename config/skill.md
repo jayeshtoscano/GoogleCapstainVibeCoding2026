@@ -21,5 +21,17 @@ routing_rules:
 
 fallback: gemini
 
+routing:
+
+  default: general
+
+  coding: openai
+
+  reasoning: claude
+
+  analysis: gemini
+
+  summarization: gemini
+
 mongodb:
   database: GatekeeperDB
