@@ -1,37 +1,94 @@
 llms:
+
   openai:
-    model: gpt-4.1-mini
-    cost: low
-    latency: medium
+    model: gpt-4.1
+    enabled: true
 
   gemini:
     model: gemini-2.5-flash
-    cost: low
-    latency: low
+    enabled: true
 
   claude:
-    model: claude-3-haiku
-    cost: medium
-    latency: low
+    model: claude-sonnet-4
+    enabled: true
 
-routing_rules:
-  coding: openai
-  summarization: gemini
-  reasoning: claude
 
-fallback: gemini
+##########################################################
+# POLICY ENGINE
+##########################################################
 
-routing:
+policies:
 
-  default: general
+  default:
 
-  coding: openai
+    providers:
+      - gemini
+      - openai
+      - claude
 
-  reasoning: claude
+    rules:
 
-  analysis: gemini
+      keyword:
+        "refactor": openai
+        "optimize": claude
+        "debug": openai
 
-  summarization: gemini
+      complex_prompt_threshold: 2000
+      complex_provider: claude
 
-mongodb:
-  database: GatekeeperDB
+    fallback: gemini
+
+
+  coding:
+
+    providers:
+      - openai
+      - claude
+
+    rules:
+
+      keyword:
+        "leetcode": openai
+        "fix bug": openai
+        "performance": claude
+
+      complex_prompt_threshold: 1500
+      complex_provider: claude
+
+    fallback: openai
+
+
+  reasoning:
+
+    providers:
+      - claude
+      - openai
+
+    rules:
+
+      keyword:
+        "why": claude
+        "explain": claude
+
+      complex_prompt_threshold: 1200
+      complex_provider: claude
+
+    fallback: claude
+
+
+  analysis:
+
+    providers:
+      - gemini
+      - claude
+
+    rules:
+
+      keyword:
+        "trend": gemini
+        "summary": gemini
+
+      complex_prompt_threshold: 1800
+      complex_provider: claude
+
+    fallback: gemini
