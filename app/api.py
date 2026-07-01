@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-import Orchestrator
+from orchestrator import Orchestrator
 from models.request_models import PromptRequest
 
 router = APIRouter()
