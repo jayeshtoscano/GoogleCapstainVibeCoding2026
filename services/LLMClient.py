@@ -1,110 +1,214 @@
-import requests
-import yaml
-import logging
+"""
+------------------------------------------------------------
+LLM Client
+------------------------------------------------------------
 
-logger = logging.getLogger("llm_client")
+Responsibilities
+- Read LLM configuration from config_loader
+- Route requests to appropriate provider
+- Handle fallback providers
+- Log execution details
+------------------------------------------------------------
+"""
 
+from typing import Dict, Callable
 
-##########################################################
-# Load skill.md
-##########################################################
+from ConfigLoader import get_skill_config
+from utils.logger import logger
 
-def load_skill():
-    with open("config/skill.md", "r") as f:
-        return yaml.safe_load(f)
-
-
-SKILL = load_skill()
-
-
-##########################################################
-# LLM Client Class
-##########################################################
 
 class LLMClient:
 
     def __init__(self):
 
-        self.llms = SKILL.get("llms", {})
-        self.routing = SKILL.get("routing", {})
-        self.fallback = self.routing.get("default", "gemini")
+        skill = get_skill_config()
 
-    ######################################################
-    # Select Model Based on Category
-    ######################################################
+        self.llms = skill.get("llms", {})
+        self.routing = skill.get("routing", {})
 
-    def select_llm(self, category: str):
-
-        return self.routing.get(
-            category,
-            self.fallback
+        self.default_provider = self.routing.get(
+            "default",
+            "gemini"
         )
 
-    ######################################################
-    # Call LLM Provider
-    ######################################################
+        self.providers: Dict[str, Callable] = {
+            "openai": self._call_openai,
+            "gemini": self._call_gemini,
+            "claude": self._call_claude
+        }
 
-    def call(self, prompt: str, category: str = "default"):
+    ########################################################
+    # Select Provider
+    ########################################################
 
-        provider = self.select_llm(category)
+    def select_provider(self, category: str) -> str:
+
+        provider = self.routing.get(
+            category,
+            self.default_provider
+        )
+
+        logger.info(
+            f"Category [{category}] routed to provider [{provider}]"
+        )
+
+        return provider
+
+    ########################################################
+    # Public Method
+    ########################################################
+
+    def call(
+        self,
+        prompt: str,
+        category: str = "default"
+    ) -> str:
+
+        provider = self.select_provider(category)
+
+        try:
+
+            return self._invoke(
+                provider,
+                prompt
+            )
+
+        except Exception as ex:
+
+            logger.error(
+                f"LLM [{provider}] failed. Error: {str(ex)}"
+            )
+
+            if provider != self.default_provider:
+
+                logger.info(
+                    f"Falling back to [{self.default_provider}]"
+                )
+
+                return self._invoke(
+                    self.default_provider,
+                    prompt
+                )
+
+            raise
+
+    ########################################################
+    # Internal Invocation
+    ########################################################
+
+    def _invoke(
+        self,
+        provider: str,
+        prompt: str
+    ) -> str:
 
         config = self.llms.get(provider)
 
-        if not config:
+        if config is None:
 
-            raise Exception(
-                f"LLM config not found for {provider}"
+            raise ValueError(
+                f"Configuration missing for provider [{provider}]"
             )
 
         model = config.get("model")
 
         logger.info(
-            f"Using LLM: {provider} | Model: {model}"
+            f"Invoking Provider={provider} Model={model}"
         )
 
-        # -----------------------------
-        # OpenAI-style generic request
-        # -----------------------------
+        handler = self.providers.get(provider)
 
-        if provider == "openai":
+        if handler is None:
 
-            return self._call_openai(model, prompt)
-
-        elif provider == "gemini":
-
-            return self._call_gemini(model, prompt)
-
-        elif provider == "claude":
-
-            return self._call_claude(model, prompt)
-
-        else:
-
-            raise Exception(
-                f"Unsupported provider: {provider}"
+            raise ValueError(
+                f"Provider [{provider}] not supported"
             )
 
-    ######################################################
+        return handler(
+            model=model,
+            prompt=prompt,
+            config=config
+        )
+
+    ########################################################
     # OpenAI
-    ######################################################
+    ########################################################
 
-    def _call_openai(self, model, prompt):
+    def _call_openai(
+        self,
+        model: str,
+        prompt: str,
+        config: dict
+    ) -> str:
 
-        # placeholder for real API key integration
+        logger.info(
+            f"Calling OpenAI Model [{model}]"
+        )
+
+        # TODO:
+        # Replace with OpenAI SDK
+
         return f"[OpenAI:{model}] {prompt}"
 
-    ######################################################
+    ########################################################
     # Gemini
-    ######################################################
+    ########################################################
 
-    def _call_gemini(self, model, prompt):
+    def _call_gemini(
+        self,
+        model: str,
+        prompt: str,
+        config: dict
+    ) -> str:
+
+        logger.info(
+            f"Calling Gemini Model [{model}]"
+        )
+
+        # TODO:
+        # Replace with Gemini SDK
 
         return f"[Gemini:{model}] {prompt}"
 
-    ######################################################
+    ########################################################
     # Claude
-    ######################################################
+    ########################################################
 
-    def _call_claude(self, model, prompt):
+    def _call_claude(
+        self,
+        model: str,
+        prompt: str,
+        config: dict
+    ) -> str:
+
+        logger.info(
+            f"Calling Claude Model [{model}]"
+        )
+
+        # TODO:
+        # Replace with Anthropic SDK
 
         return f"[Claude:{model}] {prompt}"
+
+    ########################################################
+    # Health Check
+    ########################################################
+
+    def available_models(self):
+
+        models = {}
+
+        for provider, config in self.llms.items():
+
+            models[provider] = {
+
+                "model": config.get("model"),
+
+                "enabled": config.get(
+                    "enabled",
+                    True
+                )
+
+            }
+
+        return models
