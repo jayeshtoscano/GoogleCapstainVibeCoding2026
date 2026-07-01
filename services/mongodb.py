@@ -1,17 +1,25 @@
 from pymongo import MongoClient
 import yaml
-import logging
 
-logger = logging.getLogger("mongodb")
+from utils.logger import get_logger
+from ConfigLoader import get_mongodb_config
 
 
 ##########################################################
-# Load skill.md configuration
+# Logger (Centralized)
+##########################################################
+
+logger = get_logger("mongodb")
+
+
+##########################################################
+# Load configuration (NO direct file access)
 ##########################################################
 
 def load_skill():
-    with open("config/skill.md", "r") as f:
-        return yaml.safe_load(f)
+
+    # Prefer config_loader instead of reading file directly
+    return get_mongodb_config()
 
 
 SKILL = load_skill()
@@ -30,7 +38,7 @@ class MongoDBClient:
 
         if MongoDBClient._client is None:
 
-            config = SKILL["mongodb"]
+            config = SKILL
 
             logger.info("Connecting to MongoDB...")
 
@@ -70,6 +78,8 @@ def get_collection(name: str):
     """
 
     if db is None:
+
+        logger.error("MongoDB not initialized")
 
         raise Exception("MongoDB not initialized")
 
