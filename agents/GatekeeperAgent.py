@@ -1,4 +1,6 @@
 from utils.logger import get_logger
+from services.prompt_service import PromptService
+
 
 logger = get_logger("gatekeeper_agent")
 
@@ -9,20 +11,15 @@ class GatekeeperAgent:
         self,
         observability_agent,
         cache_agent,
-        lean_content_fn,
-        constraint_fn,
-        explicit_fn
+        prompt_service: PromptService
     ):
 
         self.observability_agent = observability_agent
         self.cache_agent = cache_agent
-
-        self.lean_content = lean_content_fn
-        self.add_constraint = constraint_fn
-        self.add_explicit = explicit_fn
+        self.prompt_service = prompt_service
 
     ########################################################
-    # MAIN EXECUTION
+    # MAIN FLOW
     ########################################################
 
     def run(self, text: str):
@@ -30,79 +27,52 @@ class GatekeeperAgent:
         logger.info("GatekeeperAgent started")
 
         ####################################################
-        # 1. SYSTEM HEALTH CHECK (NEW)
+        # 1. SYSTEM HEALTH CHECK
         ####################################################
 
         scores = self.observability_agent.project_scores()
 
-        diligence = scores["diligence_score"]
-
-        logger.info(f"Diligence Score = {diligence}")
-
-        # If system is unhealthy → fallback mode
-        if diligence < 60:
-
-            logger.warning("System in degraded mode")
+        if scores["diligence_score"] < 60:
 
             return {
                 "status": "degraded_system",
                 "message": "Low system diligence detected",
-                "diligence": scores,
-                "fallback_response": text
+                "diligence": scores
             }
 
         ####################################################
-        # 2. CACHE CHECK (FIXED: only once)
+        # 2. CACHE CHECK
         ####################################################
 
         cache_result = self.cache_agent.check(text)
 
         if cache_result.get("cached"):
 
-            logger.info("Cache hit")
-
             return cache_result
 
         ####################################################
-        # 3. LEAN CONTENT PROCESSING
+        # 3. PROMPT PROCESSING (NOW CLEAN & CENTRALIZED)
         ####################################################
 
-        cleaned = self.lean_content(text)
+        cleaned = self.prompt_service.lean_content(text)
+
+        constraint = self.prompt_service.add_constraint(cleaned)
+
+        explicit = self.prompt_service.add_explicit(
+            constraint["updated_prompt"]
+        )
+
+        final_prompt = explicit["updated_prompt"]
 
         ####################################################
-        # 4. CONSTRAINT ENRICHMENT
+        # 4. RETURN RESPONSE
         ####################################################
-
-        constraint = self.add_constraint(cleaned)
-
-        prompt = constraint["updated_prompt"]
-
-        ####################################################
-        # 5. EXPLICIT ENRICHMENT
-        ####################################################
-
-        explicit = self.add_explicit(prompt)
-
-        prompt = explicit["updated_prompt"]
-
-        ####################################################
-        # 6. RETURN FINAL PROMPT + METADATA
-        ####################################################
-
-        logger.info("GatekeeperAgent completed successfully")
 
         return {
 
-            "prompt": prompt,
+            "prompt": final_prompt,
 
-            "system_health": {
-
-                "diligence": scores["diligence_score"],
-
-                "status": scores["status"],
-
-                "metrics": scores["metrics"]
-            },
+            "system_health": scores,
 
             "meta": {
 
