@@ -1,9 +1,9 @@
-from app.agents.gatekeeper import GatekeeperAgent
-from app.agents.cache_agent import CacheAgent
-from app.agents.prompt_refiner import PromptRefinerAgent
-from app.agents.category_agent import CategoryAgent
-from app.agents.llm_router import LLMRouterAgent
-from app.agents.observability_agent import ObservabilityAgent
+from agents.gatekeeper import GatekeeperAgent
+from agents.cache_agent import CacheAgent
+from agents.prompt_refiner import PromptRefinerAgent
+from agents.category_agent import CategoryAgent
+from agents.llm_router import LLMRouterAgent
+from agents.observability_agent import ObservabilityAgent
 
 
 class Orchestrator:
