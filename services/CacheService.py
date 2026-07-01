@@ -1,4 +1,4 @@
-from app.services.mongodb import db
+from services.mongodb import db
 
 class CacheService:
 
