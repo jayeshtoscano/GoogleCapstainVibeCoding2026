@@ -1,8 +1,6 @@
 from utils.logger import get_logger
 
-
 logger = get_logger("observability_agent")
-
 
 class ObservabilityAgent:
 
@@ -187,7 +185,8 @@ class ObservabilityAgent:
 
             }
         }
- ########################################################
+   
+    ########################################################
     # HELPERS
     ########################################################
 
