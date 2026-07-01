@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.core.orchestrator import Orchestrator
-from app.models.request_models import PromptRequest
+import Orchestrator
+from models.request_models import PromptRequest
 
 router = APIRouter()
 
