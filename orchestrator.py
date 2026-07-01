@@ -7,6 +7,7 @@ from agents.observability_agent import ObservabilityAgent
 from services.lean_content import LeanContent
 from services.constraints import AddConstraint
 from services.explicit import AddExplicit
+from services.prompt_service import PromptService
 
 class Orchestrator:
 
@@ -18,8 +19,8 @@ class Orchestrator:
         self.router = LLMRouterAgent()
         self.obs = ObservabilityAgent()
         self.reviewer = ReviewerAgent()
-            self.gatekeeper = GatekeeperAgent(observability_agent=self.observability_agent,cache_agent=self.cache_agent,lean_content_fn=LeanContent,constraint_fn=AddConstraint,explicit_fn=AddExplicit
-        )
+        self.prompt_service = PromptService()
+        self.gatekeeper = GatekeeperAgent(observability_agent=self.observability_agent,cache_agent=self.cache_agent,prompt_service=self.prompt_service)
         
     def run(self, prompt: str):
 
