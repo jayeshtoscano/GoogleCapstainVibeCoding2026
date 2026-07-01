@@ -1,4 +1,4 @@
-from app.utils.logger import get_logger
+from utils.logger import get_logger
 
 logger = get_logger("gatekeeper_agent")
 
