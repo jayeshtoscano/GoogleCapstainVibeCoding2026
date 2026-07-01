@@ -1,6 +1,6 @@
 from ConfigLoader import get_skill_config
 from utils.logger import get_logger
-from services.llm_client import LLMClient
+from services.LLMClient import LLMClient
 
 
 logger = get_logger("llm_policy_router")
