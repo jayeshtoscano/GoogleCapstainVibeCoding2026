@@ -15,9 +15,9 @@ Purpose:
 from typing import Dict, Any
 import yaml
 import json
-import logging
+from utils.logger import get_logger
 
-logger = logging.getLogger("agent_card")
+logger = get_logger("agent_card")
 
 
 ##########################################################
