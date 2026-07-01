@@ -3,7 +3,7 @@ from utils.logger import get_logger
 from services.llm_client import LLMClient
 
 
-logger = get_logger("llm_router")
+logger = get_logger("llm_policy_router")
 
 
 class LLMRouterAgent:
@@ -12,102 +12,121 @@ class LLMRouterAgent:
 
         self.skill = get_skill_config()
 
-        # Routing policy from configuration
-        self.routing_map = self.skill.get("routing", {})
+        # Policy engine config
+        self.policies = self.skill.get("policies", {})
 
         self.llm_client = LLMClient()
-
-        # Default fallback category/provider
-        self.default_category = self.routing_map.get(
-            "default",
-            "general"
-        )
 
     ########################################################
     # MAIN ENTRY
     ########################################################
 
-    def run(self, prompt: str, category: str):
+    def run(self, prompt: str, category: str = "default"):
 
         logger.info(
-            f"Routing request | category={category}"
+            f"Policy routing started | category={category}"
         )
 
-        # Normalize category
-        category = (category or "").lower()
+        category = (category or "default").lower()
 
-        match category:
+        policy = self.policies.get(
+            category,
+            self.policies.get("default", {})
+        )
 
-            ################################################
-            # CODING CATEGORY
-            ################################################
-            case "coding":
+        selected_provider = self._evaluate_policy(
+            prompt,
+            category,
+            policy
+        )
 
-                provider = self.routing_map.get(
-                    "coding",
-                    "openai"
+        logger.info(
+            f"Selected provider={selected_provider} for category={category}"
+        )
+
+        return self.llm_client.call(
+            prompt=prompt,
+            category=category,
+            provider_override=selected_provider
+        )
+
+    ########################################################
+    # POLICY ENGINE CORE
+    ########################################################
+
+    def _evaluate_policy(self, prompt: str, category: str, policy: dict):
+
+        providers = policy.get("providers", [])
+        rules = policy.get("rules", {})
+        fallback = policy.get("fallback", "gemini")
+
+        prompt_lower = prompt.lower()
+
+        ####################################################
+        # 1. Keyword-based routing rules
+        ####################################################
+
+        keyword_rules = rules.get("keyword", {})
+
+        for keyword, provider in keyword_rules.items():
+
+            if keyword.lower() in prompt_lower:
+
+                logger.info(
+                    f"Keyword match '{keyword}' → {provider}"
                 )
 
-                return self.llm_client.call(
-                    prompt=prompt,
-                    category="coding"
-                )
+                return provider
 
-            ################################################
-            # REASONING CATEGORY
-            ################################################
-            case "reasoning":
+        ####################################################
+        # 2. Complexity-based routing
+        ####################################################
 
-                provider = self.routing_map.get(
-                    "reasoning",
-                    "claude"
-                )
+        if len(prompt) > rules.get("complex_prompt_threshold", 2000):
 
-                return self.llm_client.call(
-                    prompt=prompt,
-                    category="reasoning"
-                )
+            provider = rules.get(
+                "complex_provider",
+                "claude"
+            )
 
-            ################################################
-            # ANALYSIS CATEGORY (NEW)
-            ################################################
-            case "analysis":
+            logger.info("Complex prompt detected")
 
-                provider = self.routing_map.get(
-                    "analysis",
-                    "gemini"
-                )
+            return provider
 
-                return self.llm_client.call(
-                    prompt=prompt,
-                    category="analysis"
-                )
+        ####################################################
+        # 3. Category-based preferred provider order
+        ####################################################
 
-            ################################################
-            # SUMMARIZATION CATEGORY (optional extension)
-            ################################################
-            case "summarization":
+        if providers:
 
-                provider = self.routing_map.get(
-                    "summarization",
-                    "gemini"
-                )
+            for provider in providers:
 
-                return self.llm_client.call(
-                    prompt=prompt,
-                    category="summarization"
-                )
+                if self._is_provider_available(provider):
 
-            ################################################
-            # DEFAULT CATEGORY
-            ################################################
-            case _:
+                    logger.info(
+                        f"Selected preferred provider={provider}"
+                    )
 
-                logger.warning(
-                    f"Unknown category '{category}', using default"
-                )
+                    return provider
 
-                return self.llm_client.call(
-                    prompt=prompt,
-                    category=self.default_category
-                )
+        ####################################################
+        # 4. Fallback
+        ####################################################
+
+        logger.warning(
+            f"No policy match found. Falling back to {fallback}"
+        )
+
+        return fallback
+
+    ########################################################
+    # Provider Health Check (simplified stub)
+    ########################################################
+
+    def _is_provider_available(self, provider: str) -> bool:
+
+        llms = self.skill.get("llms", {})
+
+        config = llms.get(provider, {})
+
+        return config.get("enabled", True)
